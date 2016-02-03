@@ -1,0 +1,50 @@
+; Copyright (c) uib gmbh (www.uib.de)
+; This sourcecode is owned by uib
+; and published under the Terms of the General Public License.
+; credits: http://www.opsi.org/credits/
+
+requiredWinstVersion >= "4.11.4.3"
+
+DefVar $RegPathUninstall$
+DefVar $LogDir$
+DefVar $ProductId$
+DefVar $MinimumSpace$
+DefVar $InstallDir$
+DefVar $ExitCode$
+DefVar $CustomPostInstall$
+DefVar $CustomPostDeinstall$
+DefVar $DesktopIcon$
+DefVar $PrettyName$
+DefVar $PathToExe$
+DefVar $ProductVersion$
+DefVar $INST_SystemType$
+DefVar $MSVersion$
+DefVar $SearchPattern$
+DefVar $RegId$
+DefVar $UnInstallDir$
+DefStringlist $ResultList$
+
+Set $LogDir$ = "%opsiLogDir%"
+
+Set $INST_SystemType$ = GetSystemType
+Set $MSVersion$	 = GetMsVersionInfo
+
+; ----------------------------------------------------------------
+Set $ProductId$ 	= "hugin"
+Set $PrettyName$ 	= "Hugin"
+Set $MinimumSpace$ 	= "150 MB"
+Set $InstallDir$	= "%ProgramFiles64Dir%\" + $ProductId$
+Set $ProductVersion$ 	= "%installingProdVersion%"
+Set $RegPathUninstall$  = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+; ----------------------------------------------------------------
+
+setloglevel = 6
+include_append "section_sub_search_registry64_uninstall_keys.opsiinc"
+
+if not ($MSVersion$ = "6.1" OR $MSVersion$ = "10.0")
+	Logwarning "Only tested with windows 7 and 10! Please report to the maintainer successful installation on other windows versions."		
+endif
+if not ($INST_SystemType$ = "64 Bit System")
+	LogError "At the moment a 32 bit version is not included in this packet!"
+	isFatalError
+endif
