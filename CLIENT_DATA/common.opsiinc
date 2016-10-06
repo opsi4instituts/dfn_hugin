@@ -10,18 +10,20 @@ DefVar $LogDir$
 DefVar $ProductId$
 DefVar $MinimumSpace$
 DefVar $InstallDir$
+DefVar $InstFile$
 DefVar $ExitCode$
+DefVar $ErrorMsg$
 DefVar $CustomPostInstall$
 DefVar $CustomPostDeinstall$
 DefVar $DesktopIcon$
-DefVar $PrettyName$
+DefVar $ProductName$
 DefVar $PathToExe$
 DefVar $ProductVersion$
 DefVar $INST_SystemType$
 DefVar $MSVersion$
 DefVar $SearchPattern$
 DefVar $RegId$
-DefVar $UnInstallDir$
+DefVar $MsiSilentOption$
 DefStringlist $ResultList$
 
 Set $LogDir$ = "%opsiLogDir%"
@@ -29,16 +31,19 @@ Set $LogDir$ = "%opsiLogDir%"
 Set $INST_SystemType$ = GetSystemType
 Set $MSVersion$	 = GetMsVersionInfo
 
+Set $ProductVersion$ = takestring (0, splitString("%installingProdVersion%", "-"))
+Set $MsiSilentOption$ = GetProductProperty("msi_silent_option","/qb!")
+
 ; ----------------------------------------------------------------
 Set $ProductId$ 	= "hugin"
-Set $PrettyName$ 	= "Hugin"
+Set $ProductName$ 	= "Hugin"
 Set $MinimumSpace$ 	= "150 MB"
-Set $InstallDir$	= "%ProgramFiles64Dir%\" + $ProductId$
-Set $ProductVersion$ 	= "%installingProdVersion%"
+Set $InstFile$		= "Hugin-" + $ProductVersion$ + "-win64.msi"
 Set $RegPathUninstall$  = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
 ; ----------------------------------------------------------------
 
 setloglevel = 6
+include_append "check_msi_exitcode.opsiinc"
 include_append "section_sub_search_registry64_uninstall_keys.opsiinc"
 
 if not ($MSVersion$ = "6.1" OR $MSVersion$ = "10.0")

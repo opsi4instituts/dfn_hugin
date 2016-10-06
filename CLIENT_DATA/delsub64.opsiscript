@@ -13,13 +13,20 @@ Switch count ($ResultList$)
 		comment "No installations of " + $SearchPattern$ + " found in $RegPathUninstall$. Nothing to do"
 	EndCase
 	Case "1"
-		Message "Uninstalling " + $PrettyName$ + " 64 Bit..."
+		Message "Uninstalling " + $ProductName$ + " 64 Bit..."
 		Set $RegId$ = takeString(0, $ResultList$)
-		comment "Found a version which was installed by just copying the files (like we do)
-		Set $UnInstallDir$ = GetRegistryStringValue64("[" + $RegPathUninstall$ + "\" + $RegId$ + "] InstallLocation")
-		Files_uninstall
-		Registry_uninstall /64Bit
-		LinkFolder_uninstall_programs
+		
+		; 'OPSI' im DisplayName der Registry ist der entscheidende Punkt, ob eine Installatin via 'files_install' oder MSI vorgefunden wird
+		if not(contains(GetRegistryStringValue64("[" + $RegPathUninstall$ + "\" + $RegId$ + "] DisplayName"), "OPSI"))
+			Winbatch_uninstall_msi
+			Sub_check_exitcode
+		else
+			comment "Found a version which was installed by just copying the files (before version 2016.2.0)
+			Set $InstallDir$ = GetRegistryStringValue64("[" + $RegPathUninstall$ + "\" + $RegId$ + "] InstallLocation")
+			Files_uninstall
+			Registry_uninstall /64Bit
+			LinkFolder_uninstall_programs
+		endif
 
 		set $DesktopIcon$ = getProductProperty("desktopicon","no")
 		if $DesktopIcon$ = "yes"
@@ -41,18 +48,21 @@ Switch count ($ResultList$)
 	EndCase
 EndSwitch                    
 
+[Winbatch_uninstall_msi]
+msiexec /x $RegId$ $MsiSilentOption$ REBOOT=ReallySuppress
+
 [Files_uninstall]
-delete -sf $UnInstallDir$
+delete -sf $InstallDir$
 
 [Linkfolder_uninstall_desktopicon]
 set_basefolder common_desktopdirectory
 set_subfolder ""
-delete_element $PrettyName$
+delete_element $ProductName$
 	
 [LinkFolder_uninstall_programs]
 set_basefolder common_startmenu
 set_subfolder "Programs"
-delete_element $PrettyName$
+delete_element $ProductName$
 	
 [Registry_uninstall]
 deletekey [$RegPathUninstall$\$ProductId$]
