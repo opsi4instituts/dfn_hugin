@@ -9,7 +9,7 @@ id: dfn_hugin
 name: Hugin
 description: 'Panorama Photo Stitcher' für das Zusammensetzen von Panoramen aus einzelnen Fotografien
 advice: 
-version: 2016.2.0
+version: 2017.0.0
 priority: 0
 licenseRequired: False
 productClasses: 
@@ -57,6 +57,10 @@ values: ["/qb!", "/qn"]
 default: ["/qb!"]
 
 [Changelog]
+dfn_hugin (2017.0.0-1)
+	* neue Upstreamversion
+-- URLAUBSVERTRETUNG Detlef Krummel (GEI) <krummel@gei.de>, 03.07.2017
+
 dfn_hugin (2016.2.0-1)
 	* neue Upstreamversion (nur noch MSI)
 	* MSI anstatt Files (inkl. silent ProductProperty)
@@ -66,97 +70,3 @@ dfn_hugin (2016.2.0-1)
 dfn_hugin (2015.0.0-1)
 	* Initiales DFN-Paket
  -- Lukas Stapelbroek (archIT/KIT) <lukas.stapelbroek9@kit.edu>, 18.01.2016
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
