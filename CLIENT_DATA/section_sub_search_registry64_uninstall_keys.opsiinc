@@ -22,7 +22,10 @@ if (contains("%s%", $SearchPattern$))
 endif
 ; eine MSI-ID wie z.B. {23170F69-40C1-2702-1512-000001000000} enthält immer diese spezifischen Zeichen: { - }
 if (contains("%s%", "{") AND contains("%s%", "-") AND contains("%s%", "}"))
-	Set $ResultList$ = addtolist($ResultList$, takeString (-1,splitString("%s%", '\')))
+	;nur MSI-IDs, die zum Produkt gehören sollen übernommen werden
+	if (contains(GetRegistryStringValue64("[" + "%s%" + "] DisplayName"), $SearchPattern$))
+		Set $ResultList$ = addtolist($ResultList$, takeString (-1,splitString("%s%", '\')))
+	endif	
 endif
 
 [execWith_registry64_query]

@@ -1,5 +1,5 @@
 [Package]
-version: 1
+version: 2
 depends: 
 incremental: False
 
@@ -57,6 +57,10 @@ values: ["/qb!", "/qn"]
 default: ["/qb!"]
 
 [Changelog]
+dfn_hugin (2017.0.0-2)
+	* Registrysuche verbessert/verfeinert (Problem mit Installer von Luminance HDR)
+-- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 10.07.2017
+
 dfn_hugin (2017.0.0-1)
 	* neue Upstreamversion
 -- URLAUBSVERTRETUNG Detlef Krummel (GEI) <krummel@gei.de>, 03.07.2017

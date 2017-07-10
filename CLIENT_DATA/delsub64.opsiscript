@@ -3,7 +3,7 @@
 ; and published under the Terms of the General Public License.
 ; credits: http://www.opsi.org/credits/
 
-Set $SearchPattern$ = $ProductId$
+Set $SearchPattern$ = $ProductName$
 ; Parameter: $SearchPattern$ Suchbegriff in Registry
 Sub_search_registry64_uninstall_keys
 ; Rückgabewert: $ResultList$ gefundene Einträge
