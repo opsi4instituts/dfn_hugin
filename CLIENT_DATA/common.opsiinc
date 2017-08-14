@@ -1,8 +1,3 @@
-; Copyright (c) uib gmbh (www.uib.de)
-; This sourcecode is owned by uib
-; and published under the Terms of the General Public License.
-; credits: http://www.opsi.org/credits/
-
 requiredWinstVersion >= "4.11.4.3"
 
 DefVar $RegPathUninstall$
@@ -15,7 +10,7 @@ DefVar $ExitCode$
 DefVar $ErrorMsg$
 DefVar $CustomPostInstall$
 DefVar $CustomPostDeinstall$
-DefVar $DesktopIcon$
+DefVar $DesktopLink$
 DefVar $ProductName$
 DefVar $PathToExe$
 DefVar $ProductVersion$
@@ -23,7 +18,7 @@ DefVar $INST_SystemType$
 DefVar $MSVersion$
 DefVar $SearchPattern$
 DefVar $RegId$
-DefVar $MsiSilentOption$
+DefVar $SilentOption$
 DefStringlist $ResultList$
 
 Set $LogDir$ = "%opsiLogDir%"
@@ -32,7 +27,8 @@ Set $INST_SystemType$ = GetSystemType
 Set $MSVersion$	 = GetMsVersionInfo
 
 Set $ProductVersion$ = takestring (0, splitString("%installingProdVersion%", "-"))
-Set $MsiSilentOption$ = GetProductProperty("msi_silent_option","/qb!")
+Set $SilentOption$ = GetProductProperty("silent-option","/qb!")
+Set $DesktopLink$ = getProductProperty("desktop-link","no")
 
 ; ----------------------------------------------------------------
 Set $ProductId$ 	= "hugin"
@@ -52,4 +48,13 @@ endif
 if not ($INST_SystemType$ = "64 Bit System")
 	LogError "At the moment a 32 bit version is not included in this packet!"
 	isFatalError
+endif
+
+comment "Show product picture"
+if (FileExists("%ScriptPath%\..\lib\icons\%installingProdName%.png"))
+       comment "logo at local library/icons found."
+       ShowBitmap "%ScriptPath%\..\lib\icons\%installingProdName%.png" $ProductName$
+else
+       comment "no logo at local library/icons, use from ScriptPath ..."
+       ShowBitmap "%ScriptPath%\o4i.png" $ProductName$
 endif
