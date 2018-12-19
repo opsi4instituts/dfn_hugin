@@ -1,26 +1,35 @@
-Set $SearchPattern$ = $ProductName$
-; Parameter: $SearchPattern$ Suchbegriff in Registry
-Sub_search_registry64_uninstall_keys
-; Rückgabewert: $ResultList$ gefundene Einträge
+Message "Searching installation of " + $ProductName$ + " 64 Bit..."
+
+; Ergebnis ist StringList (mehrere Einträge möglich);
+; in einer Zeile werden drei Ergebnisse mit "|" abgetrennt geliefert: Registrykey (mit Pfad) | Bereich Registry (kann direkt getRegistryValue übergeben werden | DisplayName
+; z.B. HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Test64|64bit|Test Registry Entry64
+Set $ResultList$ = SearchRegistryUninstallKeys($ProductName$)
 
 Switch count ($ResultList$)
 	Case "0"
-		comment "No installations of " + $SearchPattern$ + " found in $RegPathUninstall$. Nothing to do"
+		comment "No installations of " + $ProductName$ + " found in registry. Nothing to do"
 	EndCase
 	Case "1"
-		Message "Uninstalling " + $ProductName$ + " ..."
-		Set $RegId$ = takeString(0, $ResultList$)
-		
-		; 'OPSI' im DisplayName der Registry ist der entscheidende Punkt, ob eine Installatin via 'files_install' oder MSI vorgefunden wird
-		if not(contains(GetRegistryStringValue64("[" + $RegPathUninstall$ + "\" + $RegId$ + "] DisplayName"), "OPSI"))
-			Winbatch_uninstall_msi
-			Sub_check_exitcode
-		else
-			comment "Found a version which was installed by just copying the files (before version 2016.2.0)
-			Set $InstallDir$ = GetRegistryStringValue64("[" + $RegPathUninstall$ + "\" + $RegId$ + "] InstallLocation")
+		Set $RegId$ = takeString (0,splitString(takeString(0,$ResultList$), '|'))
+		Set $RegBitScope$ = takeString (1,splitString(takeString(0,$ResultList$), '|'))	
+		Set $RegDisplayName$ = takeString (2,splitString(takeString(0,$ResultList$), '|'))
+		Message "Uninstalling " + $ProductName$ + " " + $RegBitScope$ + "..."
+
+		; 'OPSI' im DisplayName ist der entscheidende Punkt, ob eine Installation via 'files_install' vorgefunden wird
+		if (contains($RegDisplayName$, "OPSI"))
+			comment "Found a version which was installed by OPSI just copying the files (before version 2016.2.0)
+			Set $InstallDir$ = GetRegistryValue($RegId$, "InstallLocation", $RegBitScope$)
 			Files_uninstall
 			Registry_uninstall /64Bit
 			LinkFolder_uninstall_programs
+		else
+			; für MSI wird nur der eigentliche Regkey (ohne Pfad) benötigt
+			Set $RegId$ = takeString (-1,splitString($RegId$,"\"))
+			Winbatch_uninstall_msi
+			Set $ExitCode$ = getLastExitCode
+			if stringToBool(isMsiExitcodeFatal($ExitCode$, "True", $ErrorString$))
+				isFatalError
+			endif			
 		endif
 
 		if $DesktopLink$ = "true"
@@ -59,4 +68,4 @@ set_subfolder "Programs"
 delete_element $ProductName$
 	
 [Registry_uninstall]
-deletekey [$RegPathUninstall$\$ProductId$]
+deletekey [$RegId$]

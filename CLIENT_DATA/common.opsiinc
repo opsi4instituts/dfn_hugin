@@ -1,23 +1,24 @@
-requiredWinstVersion >= "4.11.4.3"
+requiredWinstVersion >= "4.12.0.16"
 
-DefVar $RegPathUninstall$
 DefVar $LogDir$
 DefVar $ProductId$
 DefVar $MinimumSpace$
 DefVar $InstallDir$
 DefVar $InstFile$
 DefVar $ExitCode$
-DefVar $ErrorMsg$
+DefVar $ErrorString$
 DefVar $CustomPostInstall$
 DefVar $CustomPostDeinstall$
 DefVar $DesktopLink$
 DefVar $ProductName$
 DefVar $PathToExe$
 DefVar $ProductVersion$
+DefVar $InstalledVersion$
 DefVar $INST_SystemType$
 DefVar $MSVersion$
-DefVar $SearchPattern$
 DefVar $RegId$
+DefVar $RegBitScope$
+DefVar $RegDisplayName$
 DefVar $SilentOption$
 DefStringlist $ResultList$
 
@@ -35,18 +36,23 @@ Set $ProductId$ 	= "hugin"
 Set $ProductName$ 	= "Hugin"
 Set $MinimumSpace$ 	= "150 MB"
 Set $InstFile$		= "Hugin-" + $ProductVersion$ + "-win64.msi"
-Set $RegPathUninstall$  = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
 ; ----------------------------------------------------------------
 
-setloglevel = 6
-include_append "check_msi_exitcode.opsiinc"
-include_append "section_sub_search_registry64_uninstall_keys.opsiinc"
+if not (FileExists("%ScriptPath%\" + $InstFile$))
+	LogError "Installer not found, file '" + $InstFile$ + "' does not exist"
+	isFatalError
+endif
+
+; exitcode library von UIB (siehe C:\program files(x86)\opsi.org\opsi-client-agent\opsi-winst\lib) mit 'local functions'
+importLib "uib_exitcode.opsiscript::isMsiExitcodeFatal"
+; Library registry search uninstall keys (local functions)
+importLib "func_search_registry_uninstall_keys.opsiinc"
 
 if not ($MSVersion$ = "6.1" OR $MSVersion$ = "10.0")
 	Logwarning "Only tested with windows 7 and 10! Please report to the maintainer successful installation on other windows versions."		
 endif
 if not ($INST_SystemType$ = "64 Bit System")
-	LogError "At the moment a 32 bit version is not included in this packet!"
+	LogError "At the moment a 32 bit version is not included in this package! If you would like to have it, please ask the maintainer"
 	isFatalError
 endif
 

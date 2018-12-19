@@ -1,5 +1,5 @@
 [Actions]
-
+; common Values for (un)installation
 include_insert "common.opsiinc"
 
 if not(HasMinimumSpace ("%SystemDrive%", $MinimumSpace$))
@@ -16,21 +16,35 @@ else
 
 	comment "Start setup program"
 	Winbatch_install_msi
-	Sub_check_exitcode
+	if stringToBool(isMsiExitcodeFatal($ExitCode$, "True", $ErrorString$))
+		isFatalError
+	endif
 
 	comment "Test for installation success"
-	Set $SearchPattern$ = $ProductName$
-	; Parameter: $SearchPattern$ Suchbegriff in Registry
-	Sub_search_registry64_uninstall_keys
-	; Rückgabewert: $ResultList$ gefundene Einträge
+	; Ergebnis ist StringList (mehrere Einträge möglich);
+	; in einer Zeile werden drei Ergebnisse mit "|" abgetrennt geliefert: Registrykey (mit Pfad) | Bereich Registry (kann direkt getRegistryValue übergeben werden | DisplayName
+	; z.B. HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Test64|64bit|Test Registry Entry64
+	Set $ResultList$ = SearchRegistryUninstallKeys($ProductName$)
 
 	if ( count ($ResultList$) = "0" )
-		logError "Fatal: After Installation " + $ProductName$ + " could not be found in " + $RegPathUninstall$
+		logError "Fatal: After Installation " + $ProductName$ + " could not be found in registry!"
 		isFatalError
 	else
-		Set $RegId$ = takeSTring(0, $ResultList$)
+		Set $RegId$ = takeString (0,splitString(takeString(0,$ResultList$), '|'))
+		Set $RegBitScope$ = takeString (1,splitString(takeString(0,$ResultList$), '|'))
+
+		comment "Check version"
+		; ProductVersion von OPSI-Paket "2018.0"; DisplayVersion in Registry aber "20.18.0"
+		; Workaround: alle Punkte löschen, dann sind sie vergleichbar
+		Set $InstalledVersion$ = stringReplace(GetRegistryValue($RegId$, "DisplayVersion",$RegBitScope$),".","")
+		Set $ProductVersion$ = stringReplace($ProductVersion$,".","")
+		if not ($InstalledVersion$ = $ProductVersion$)
+			LogError "Wrong version number found, something went wrong."
+			isFatalError
+		endif
+
 		comment "Get 'InstallLocation' from registry for path to exe"
-		Set $InstallDir$ = GetRegistryStringValue64("[" + $RegPathUninstall$ + "\" + $RegId$ + "] InstallLocation")
+		Set $InstallDir$ = GetRegistryValue($RegId$, "InstallLocation",$RegBitScope$)
 		Set $PathToExe$ = $InstallDir$ + "\bin\hugin.exe"
 	endif
 
