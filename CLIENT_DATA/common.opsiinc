@@ -21,6 +21,7 @@ DefVar $RegBitScope$
 DefVar $RegDisplayName$
 DefVar $SilentOption$
 DefStringlist $ResultList$
+DefStringList $InstFileList$
 
 Set $LogDir$ = "%opsiLogDir%"
 
@@ -31,22 +32,27 @@ Set $ProductVersion$ = takestring (0, splitString("%installingProdVersion%", "-"
 Set $SilentOption$ = GetProductProperty("silent-option","/qb!")
 Set $DesktopLink$ = getProductProperty("desktop-link","no")
 
+; exitcode library von UIB (siehe C:\program files(x86)\opsi.org\opsi-client-agent\opsi-winst\lib) mit 'local functions'
+importLib "uib_exitcode.opsiscript::isMsiExitcodeFatal"
+; Library registry actions (local functions)
+importLib "lib_registry_functions.opsiinc::SearchRegistryUninstallKeys"
+; Library file actions (local functions)
+importLib "lib_file_functions.opsiinc::findFileNameFromPath"
+
+Set $InstFileList$ = findFileNameFromPath("Hugin-*-win64.msi", "%ScriptPath%")
+; nur den letzten Treffer nehmen
+Set $InstFile$ = takeString(-1,$InstFileList$)
+
+if not (contains($InstFile$, $ProductVersion$))
+	LogError "Can not find $ProductVersion$ in $InstFile$!!!"
+	isFatalError
+endif
+
 ; ----------------------------------------------------------------
 Set $ProductId$ 	= "hugin"
 Set $ProductName$ 	= "Hugin"
 Set $MinimumSpace$ 	= "150 MB"
-Set $InstFile$		= "Hugin-" + $ProductVersion$ + "-win64.msi"
 ; ----------------------------------------------------------------
-
-if not (FileExists("%ScriptPath%\" + $InstFile$))
-	LogError "Installer not found, file '" + $InstFile$ + "' does not exist"
-	isFatalError
-endif
-
-; exitcode library von UIB (siehe C:\program files(x86)\opsi.org\opsi-client-agent\opsi-winst\lib) mit 'local functions'
-importLib "uib_exitcode.opsiscript::isMsiExitcodeFatal"
-; Library registry search uninstall keys (local functions)
-importLib "func_search_registry_uninstall_keys.opsiinc"
 
 if not ($MSVersion$ = "6.1" OR $MSVersion$ = "10.0")
 	Logwarning "Only tested with windows 7 and 10! Please report to the maintainer successful installation on other windows versions."		

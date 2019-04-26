@@ -16,7 +16,7 @@ else
 
 	comment "Start setup program"
 	Winbatch_install_msi
-	if stringToBool(isMsiExitcodeFatal($ExitCode$, "True", $ErrorString$))
+	if stringToBool(isMsiExitcodeFatal($ExitCode$, "False", $ErrorString$))
 		isFatalError
 	endif
 
@@ -63,7 +63,7 @@ else
 endif
 
 [Winbatch_install_msi]
-msiexec $SilentOption$ /i "%ScriptPath%\$InstFile$" /l* "$LogDir$\$ProductId$.install_log.txt" ALLUSERS=1 REBOOT=ReallySuppress
+msiexec $SilentOption$ /i "$InstFile$" /l* "$LogDir$\$ProductId$.install_log.txt" ALLUSERS=1 REBOOT=ReallySuppress
 
 [Linkfolder_create_desktoplink]
 set_basefolder common_desktopdirectory
